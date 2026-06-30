@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trading Performance — XAUUSD</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #080b0a;
+    --surface: #121816;
+    --surface-2: #182019;
+    --border: #2a332e;
+    --text: #ffffff;
+    --text-dim: #b8c4be;
+    --text-faint: #7c8a83;
+    --gold: #e6c14d;
+    --gold-dim: #9c8430;
+    --green: #5eeb95;
+    --green-dim: #1d3a26;
+    --red: #ff8585;
+    --red-dim: #422020;
+    --amber: #ffc857;
+    --blue: #6db8f2;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  .wrap {
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-size: 2.3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .header-meta {
+    text-align: right;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Tab nav */
+  .tabnav {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.85rem 1.1rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  .tab-btn .tab-r {
+    margin-left: 0.5rem;
+    font-size: 11px;
+  }
+
+  .tab-btn .tab-r.positive { color: var(--green); }
+  .tab-btn .tab-r.negative { color: var(--red); }
+
+  .tabpanel { display: none; }
+  .tabpanel.active { display: block; animation: fadeIn 0.25s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Hero stat row */
+  .hero-row {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 3rem;
+  }
+
+  .hero-cell {
+    background: var(--surface);
+    padding: 1.75rem 1.5rem;
+  }
+
+  .hero-cell.feature {
+    background: var(--surface-2);
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 0.6rem;
+  }
+
+  .hero-value {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .hero-value.positive { color: var(--green); }
+  .hero-value.negative { color: var(--red); }
+  .hero-value.gold { color: var(--gold); }
+
+  .hero-sub {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    margin-top: 0.4rem;
+  }
+
+  .sparkline {
+    margin-top: 1rem;
+    height: 36px;
+  }
+
+  /* Section headers */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 3.5rem 0 1.25rem;
+  }
+
+  .section-head:first-child { margin-top: 0; }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold-dim);
+  }
+
+  .section-head h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Chart panel */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.75rem;
+  }
+
+  .panel + .panel { margin-top: 1rem; }
+
+  .panel-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 0.25rem;
+  }
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    margin-top: 1rem;
+  }
+
+  .chart-container.small { height: 200px; }
+  .chart-container.tiny { height: 160px; }
+
+  /* Dashboard grid for month pages */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 1px;
+  }
+
+  .dash-cell {
+    background: var(--surface);
+    padding: 1.5rem;
+  }
+
+  .dash-cell.span-3 { grid-column: span 3; }
+  .dash-cell.span-4 { grid-column: span 4; }
+  .dash-cell.span-6 { grid-column: span 6; }
+  .dash-cell.span-8 { grid-column: span 8; }
+  .dash-cell.span-12 { grid-column: span 12; }
+
+  @media (max-width: 800px) {
+    .dash-cell.span-3, .dash-cell.span-4, .dash-cell.span-6, .dash-cell.span-8 { grid-column: span 12; }
+  }
+
+  .kpi-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .kpi-value.positive { color: var(--green); }
+  .kpi-value.negative { color: var(--red); }
+  .kpi-value.gold { color: var(--gold); }
+
+  .kpi-sub {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    margin-top: 0.3rem;
+  }
+
+  /* Month cards (overview) */
+  .month-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .month-card {
+    background: var(--surface);
+    padding: 1.5rem 1.25rem;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .month-card:hover { background: var(--surface-2); }
+
+  .month-card.win { border-top: 3px solid var(--green); }
+  .month-card.loss { border-top: 3px solid var(--red); }
+
+  .month-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+  }
+
+  .month-net {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .month-net.positive { color: var(--green); }
+  .month-net.negative { color: var(--red); }
+
+  .month-stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    padding: 0.4rem 0;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .month-stat-row span:last-child { font-family: 'JetBrains Mono', monospace; color: var(--text); font-weight: 600; }
+
+  /* Detail breakdown headers */
+  .month-detail-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot.win { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .dot.loss { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+  .month-detail-head h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .month-detail-head .net {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1.4rem;
+  }
+
+  .month-detail-head .net.positive { color: var(--green); }
+  .month-detail-head .net.negative { color: var(--red); }
+
+  .month-tagline {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 2rem;
+  }
+
+  .findings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 1px;
+  }
+
+  .finding-block {
+    background: var(--surface);
+    padding: 1.5rem;
+  }
+
+  .finding-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+  }
+
+  .finding-label.working { color: var(--green); }
+  .finding-label.not-working { color: var(--red); }
+
+  .finding-text {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.65;
+  }
+
+  @media (max-width: 700px) {
+    .findings { grid-template-columns: 1fr; }
+    .month-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-row { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Callout boxes */
+  .callout {
+    border-left: 3px solid var(--gold);
+    background: var(--surface);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .callout p {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .callout.danger { border-left-color: var(--red); }
+  .callout.danger .callout-label { color: var(--red); }
+
+  .callout.success { border-left-color: var(--green); }
+  .callout.success .callout-label { color: var(--green); }
+
+  /* Suggestions list */
+  .suggestion-list {
+    counter-reset: suggestion;
+  }
+
+  .suggestion {
+    counter-increment: suggestion;
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .suggestion:first-child { border-top: none; }
+
+  .suggestion-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .suggestion-num::before {
+    content: counter(suggestion, decimal-leading-zero);
+  }
+
+  .suggestion-text {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .suggestion-text strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* Motivation */
+  .motivation {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--gold-dim);
+    padding: 2.5rem;
+    margin-top: 1rem;
+    position: relative;
+  }
+
+  .motivation::before {
+    content: '"';
+    position: absolute;
+    top: 1rem;
+    left: 1.5rem;
+    font-size: 4rem;
+    color: var(--gold-dim);
+    font-family: Georgia, serif;
+    line-height: 1;
+  }
+
+  .motivation p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text);
+    max-width: 660px;
+    margin-left: 2rem;
+  }
+
+  .motivation p + p { margin-top: 1.1rem; }
+
+  .motivation .sign {
+    margin-top: 1.5rem;
+    margin-left: 2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  /* Back link on month pages */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-decoration: none;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    transition: color 0.15s ease;
+  }
+
+  .back-link:hover { color: var(--gold); }
+
+  /* Trade tag pills */
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: 3px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+
+  .pill.green { color: var(--green); border-color: var(--green-dim); }
+  .pill.red { color: var(--red); border-color: var(--red-dim); }
+  .pill.gold { color: var(--gold); border-color: var(--gold-dim); }
+
+  /* Heatmap */
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    gap: 4px;
+    margin-top: 1rem;
+  }
+
+  .heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    position: relative;
+    cursor: default;
+  }
+
+  .heatmap-cell .hm-tooltip {
+    visibility: hidden;
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2722;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .heatmap-cell:hover .hm-tooltip { visibility: visible; }
+
+  .heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 1.25rem;
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="eyebrow">XAUUSD &middot; FTMO Challenge & Testing</div>
+      <h1>Trading performance</h1>
+    </div>
+    <div class="header-meta">
+      Updated 30 June 2026<br>
+      24 trades logged
+    </div>
+  </header>
+
+  <nav class="tabnav" id="tabnav">
+    <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="march">March <span class="tab-r negative">−3R</span></button>
+    <button class="tab-btn" data-tab="april">April <span class="tab-r negative">−3R</span></button>
+    <button class="tab-btn" data-tab="may">May <span class="tab-r negative">−3R</span></button>
+    <button class="tab-btn" data-tab="june">June <span class="tab-r positive">+7R</span></button>
+  </nav>
+
+  <!-- ===================== OVERVIEW TAB ===================== -->
+  <div class="tabpanel active" id="tab-overview">
+
+    <div class="hero-row">
+      <div class="hero-cell feature">
+        <div class="hero-label">Cumulative R (all-time)</div>
+        <div class="hero-value negative">−2.0R</div>
+        <div class="hero-sub">Across 24 logged trades, March–June</div>
+        <div class="sparkline"><canvas id="heroSpark"></canvas></div>
+      </div>
+      <div class="hero-cell">
+        <div class="hero-label">Best month</div>
+        <div class="hero-value positive">+7.0R</div>
+        <div class="hero-sub">June 2026</div>
+      </div>
+      <div class="hero-cell">
+        <div class="hero-label">Best trade</div>
+        <div class="hero-value gold">+5.45R</div>
+        <div class="hero-sub">June 24, B//Testing</div>
+      </div>
+      <div class="hero-cell">
+        <div class="hero-label">Current discipline</div>
+        <div class="hero-value gold">90%</div>
+        <div class="hero-sub">Plan followed, June</div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2>Net R by month</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="panel">
+      <div class="chart-container">
+        <canvas id="monthChart" role="img" aria-label="Bar chart showing net R per month: March -3, April -3, May -3, June +7"></canvas>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2>Cumulative R across all trades</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="panel">
+      <div class="chart-container">
+        <canvas id="cumChart" role="img" aria-label="Line chart of cumulative R across 24 trades, dropping to -12R by mid-May then climbing to -2R by end of June"></canvas>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2>Month at a glance &mdash; click for full review</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="month-grid">
+      <div class="month-card loss" data-goto="march">
+        <div class="month-name">March</div>
+        <div class="month-net negative">−3.0R</div>
+        <div class="month-stat-row"><span>Win rate</span><span>0%</span></div>
+        <div class="month-stat-row"><span>Trades</span><span>3</span></div>
+      </div>
+      <div class="month-card loss" data-goto="april">
+        <div class="month-name">April</div>
+        <div class="month-net negative">−3.0R</div>
+        <div class="month-stat-row"><span>Win rate</span><span>0%</span></div>
+        <div class="month-stat-row"><span>Trades</span><span>3</span></div>
+      </div>
+      <div class="month-card loss" data-goto="may">
+        <div class="month-name">May</div>
+        <div class="month-net negative">−3.0R</div>
+        <div class="month-stat-row"><span>Win rate</span><span>13%</span></div>
+        <div class="month-stat-row"><span>Trades</span><span>8</span></div>
+      </div>
+      <div class="month-card win" data-goto="june">
+        <div class="month-name">June</div>
+        <div class="month-net positive">+7.0R</div>
+        <div class="month-stat-row"><span>Win rate</span><span>40%</span></div>
+        <div class="month-stat-row"><span>Trades</span><span>10</span></div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">03b</span>
+      <h2>Drawdown</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Distance below equity peak, in R</div>
+      <div class="chart-container small">
+        <canvas id="drawdownChart" role="img" aria-label="Area chart showing drawdown from equity peak, deepest around -12.96R in mid May, recovering to near 0 by end of June"></canvas>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">03c</span>
+      <h2>R distribution & streaks</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-cell span-7">
+        <div class="panel-title">Distribution of trade outcomes (R)</div>
+        <div class="chart-container small"><canvas id="distChart" role="img" aria-label="Histogram of trade R values showing most trades clustered at -1R with a tail of larger wins"></canvas></div>
+      </div>
+      <div class="dash-cell span-5">
+        <div class="panel-title">Win / loss streaks (all-time)</div>
+        <div class="chart-container small"><canvas id="streakChart" role="img" aria-label="Bar chart of consecutive win and loss streaks across the trade history"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">03d</span>
+      <h2>Daily activity</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Trade calendar &mdash; colour shows daily net R</div>
+      <div id="heatmap" class="heatmap-grid"></div>
+      <div class="heatmap-legend">
+        <span class="mono">Loss</span>
+        <span class="legend-swatch" style="background:#3a1a1a"></span>
+        <span class="legend-swatch" style="background:#7a3030"></span>
+        <span class="legend-swatch" style="background:#2a332e"></span>
+        <span class="legend-swatch" style="background:#1d3a26"></span>
+        <span class="legend-swatch" style="background:#1f5c38"></span>
+        <span class="mono">Win</span>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">03e</span>
+      <h2>Performance by session</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-cell span-4">
+        <div class="kpi-label">Asia</div>
+        <div class="kpi-value">10 trades</div>
+        <div class="chart-container tiny"><canvas id="asiaBar" role="img" aria-label="Bar showing Asia session win loss breakeven counts"></canvas></div>
+      </div>
+      <div class="dash-cell span-4">
+        <div class="kpi-label">London</div>
+        <div class="kpi-value">5 trades</div>
+        <div class="chart-container tiny"><canvas id="londonBar" role="img" aria-label="Bar showing London session win loss breakeven counts"></canvas></div>
+      </div>
+      <div class="dash-cell span-4">
+        <div class="kpi-label">New York</div>
+        <div class="kpi-value">8 trades</div>
+        <div class="chart-container tiny"><canvas id="nyBar" role="img" aria-label="Bar showing New York session win loss breakeven counts"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2>Outlook for July</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="callout success">
+      <div class="callout-label">Projection</div>
+      <p>If July holds the June pattern — with-trend only, Double Confirmation entries, plan followed 90%+ — a repeat of +5R to +7R is realistic. The upward trend from May into June is the clearest signal yet that the discipline rules are working, not just a single lucky stretch.</p>
+    </div>
+    <div class="callout danger">
+      <div class="callout-label">Risk to watch</div>
+      <p>The one counter trend slip in June was also the most expensive trade of the month. If that pattern repeats, it suggests sizing should be reduced specifically when stepping outside the plan, rather than just hoping it doesn't happen again.</p>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <h2>Suggestions</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="panel">
+      <div class="suggestion-list">
+        <div class="suggestion">
+          <span class="suggestion-num"></span>
+          <div class="suggestion-text"><strong>Track Double Confirmation separately.</strong> It's only a few weeks old — tag these trades distinctly to measure its win rate in isolation once the sample size grows.</div>
+        </div>
+        <div class="suggestion">
+          <span class="suggestion-num"></span>
+          <div class="suggestion-text"><strong>Add a trend filter view.</strong> Sort the journal by With Trend vs Counter Trend so any slip is immediately visible rather than discovered after the fact.</div>
+        </div>
+        <div class="suggestion">
+          <span class="suggestion-num"></span>
+          <div class="suggestion-text"><strong>Reduce size, don't fully block, on tempting counter trend setups.</strong> Try 0.5% instead of 1% — keeps you honest about temptation without shutting down forward-testing curiosity entirely.</div>
+        </div>
+        <div class="suggestion">
+          <span class="suggestion-num"></span>
+          <div class="suggestion-text"><strong>Revisit this dashboard monthly.</strong> Ask for an update at the start of each new month so the comparison stays current and the trend stays visible.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">06</span>
+      <h2>The bigger picture</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="motivation">
+      <p>Three months of flat losses, then a complete reversal. That's not luck — that's the direct result of cutting counter trend trades and tightening entry criteria. The market didn't change in June. You did.</p>
+      <p>The +7R month happened because of decisions made in May: reviewing the May 19 trade, identifying it as the benchmark, and building a system around repeating it. That's exactly how real traders compound an edge — not through one lucky month, but by identifying what worked and doing it on purpose, repeatedly.</p>
+      <p>Stay with the process. The next test isn't beating June — it's proving June wasn't an accident.</p>
+      <div class="sign">— Trading journal review, June 30 2026</div>
+    </div>
+
+  </div>
+
+  <!-- ===================== MARCH TAB ===================== -->
+  <div class="tabpanel" id="tab-march">
+    <a class="back-link" data-goto="overview">&larr; Back to overview</a>
+    <div class="month-detail-head">
+      <span class="dot loss"></span>
+      <h2>March 2026 — Baseline</h2>
+      <span class="net negative">−3.0R</span>
+    </div>
+    <p class="month-tagline">Early FTMO challenge trades, before any formal discipline rules existed.</p>
+
+    <div class="dash-grid">
+      <div class="dash-cell span-3"><div class="kpi-label">Win rate</div><div class="kpi-value negative">0%</div><div class="kpi-sub">0W &middot; 0BE &middot; 3L</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Trades logged</div><div class="kpi-value">3</div><div class="kpi-sub">All FTMO Challenge</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Best trade</div><div class="kpi-value negative">−1.0R</div><div class="kpi-sub">No winners this month</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Avg R per trade</div><div class="kpi-value negative">−1.0R</div><div class="kpi-sub">Consistent 1R stop-outs</div></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">A</span>
+      <h2>Trade-by-trade R</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="panel">
+      <div class="chart-container small"><canvas id="marchTradeChart" role="img" aria-label="Bar chart of 3 trades in March, all at -1R"></canvas></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">B</span>
+      <h2>Outcome split</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-cell span-6">
+        <div class="panel-title">Win / loss / break even</div>
+        <div class="chart-container tiny"><canvas id="marchDonut" role="img" aria-label="Donut chart: 0 wins, 0 break even, 3 losses"></canvas></div>
+      </div>
+      <div class="dash-cell span-6">
+        <div class="panel-title">Trade tags this month</div>
+        <div class="pill-row">
+          <span class="pill red">No with-trend filter</span>
+          <span class="pill red">No BE rule</span>
+          <span class="pill red">Pre-system trading</span>
+        </div>
+        <div class="panel-title" style="margin-top: 1.5rem;">Sessions traded</div>
+        <div class="pill-row">
+          <span class="pill">Asia x3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">C</span>
+      <h2>What worked, what didn't</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="findings">
+      <div class="finding-block">
+        <div class="finding-label working">Working</div>
+        <div class="finding-text">Early FTMO challenge trades established a real baseline before any formal discipline rules existed.</div>
+      </div>
+      <div class="finding-block">
+        <div class="finding-label not-working">Not working</div>
+        <div class="finding-text">No with-trend filter, no BE management rule, no entry confirmation model — essentially pre-system trading.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== APRIL TAB ===================== -->
+  <div class="tabpanel" id="tab-april">
+    <a class="back-link" data-goto="overview">&larr; Back to overview</a>
+    <div class="month-detail-head">
+      <span class="dot loss"></span>
+      <h2>April 2026 — SL lessons</h2>
+      <span class="net negative">−3.0R</span>
+    </div>
+    <p class="month-tagline">The month the stop-loss / wick problem was first identified.</p>
+
+    <div class="dash-grid">
+      <div class="dash-cell span-3"><div class="kpi-label">Win rate</div><div class="kpi-value negative">0%</div><div class="kpi-sub">0W &middot; 0BE &middot; 3L</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Trades logged</div><div class="kpi-value">3</div><div class="kpi-sub">All FTMO Challenge</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Best trade</div><div class="kpi-value negative">−1.0R</div><div class="kpi-sub">No winners this month</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Avg R per trade</div><div class="kpi-value negative">−1.0R</div><div class="kpi-sub">Stopped before TP every time</div></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">A</span>
+      <h2>Trade-by-trade R</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="panel">
+      <div class="chart-container small"><canvas id="aprilTradeChart" role="img" aria-label="Bar chart of 3 trades in April, all at -1R"></canvas></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">B</span>
+      <h2>Outcome split</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-cell span-6">
+        <div class="panel-title">Win / loss / break even</div>
+        <div class="chart-container tiny"><canvas id="aprilDonut" role="img" aria-label="Donut chart: 0 wins, 0 break even, 3 losses"></canvas></div>
+      </div>
+      <div class="dash-cell span-6">
+        <div class="panel-title">Trade tags this month</div>
+        <div class="pill-row">
+          <span class="pill gold">Bias correct</span>
+          <span class="pill red">SL hit on wick</span>
+          <span class="pill red">Stopped before TP</span>
+        </div>
+        <div class="panel-title" style="margin-top: 1.5rem;">Sessions traded</div>
+        <div class="pill-row">
+          <span class="pill">New York x2</span>
+          <span class="pill">Asia x1</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">C</span>
+      <h2>What worked, what didn't</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="findings">
+      <div class="finding-block">
+        <div class="finding-label working">Working</div>
+        <div class="finding-text">Bias and entries were directionally correct across most trades — the read on the market was sound.</div>
+      </div>
+      <div class="finding-block">
+        <div class="finding-label not-working">Not working</div>
+        <div class="finding-text">Every trade stopped out before reaching TP. Wicks repeatedly took out technically well-placed stops.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MAY TAB ===================== -->
+  <div class="tabpanel" id="tab-may">
+    <a class="back-link" data-goto="overview">&larr; Back to overview</a>
+    <div class="month-detail-head">
+      <span class="dot loss"></span>
+      <h2>May 2026 — The grind</h2>
+      <span class="net negative">−3.0R</span>
+    </div>
+    <p class="month-tagline">A heavy losing stretch, but also the month that produced the benchmark trade.</p>
+
+    <div class="dash-grid">
+      <div class="dash-cell span-3"><div class="kpi-label">Win rate</div><div class="kpi-value negative">13%</div><div class="kpi-sub">1W &middot; 2BE &middot; 5L</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Trades logged</div><div class="kpi-value">8</div><div class="kpi-sub">Mixed accounts</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Best trade</div><div class="kpi-value positive">+2.96R</div><div class="kpi-sub">May 19, Asia</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Worst stretch</div><div class="kpi-value negative">3L / 10d</div><div class="kpi-sub">~$3,200 AUD drawdown</div></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">A</span>
+      <h2>Trade-by-trade R</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="panel">
+      <div class="chart-container small"><canvas id="mayTradeChart" role="img" aria-label="Bar chart of 8 trades in May, mostly -1R with one +2.96R standout"></canvas></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">B</span>
+      <h2>Outcome split & tags</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-cell span-6">
+        <div class="panel-title">Win / loss / break even</div>
+        <div class="chart-container tiny"><canvas id="mayDonut" role="img" aria-label="Donut chart: 1 win, 2 break even, 5 losses"></canvas></div>
+      </div>
+      <div class="dash-cell span-6">
+        <div class="panel-title">Trade tags this month</div>
+        <div class="pill-row">
+          <span class="pill green">Benchmark trade (May 19)</span>
+          <span class="pill red">Counter trend present</span>
+          <span class="pill red">Emotional compounding</span>
+        </div>
+        <div class="panel-title" style="margin-top: 1.5rem;">Sessions traded</div>
+        <div class="pill-row">
+          <span class="pill">Asia x3</span>
+          <span class="pill">New York x3</span>
+          <span class="pill">London x2</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">C</span>
+      <h2>What worked, what didn't</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="findings">
+      <div class="finding-block">
+        <div class="finding-label working">Working</div>
+        <div class="finding-text">May 19 (Asia) became the benchmark trade — textbook entry, SL placement, and patience. Proof the strategy works when executed cleanly.</div>
+      </div>
+      <div class="finding-block">
+        <div class="finding-label not-working">Not working</div>
+        <div class="finding-text">Heavy losing stretch in late May, three losses in ten days (~$3,200 AUD). Counter trend trades still common, with emotional pressure compounding after each loss.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== JUNE TAB ===================== -->
+  <div class="tabpanel" id="tab-june">
+    <a class="back-link" data-goto="overview">&larr; Back to overview</a>
+    <div class="month-detail-head">
+      <span class="dot win"></span>
+      <h2>June 2026 — The turning point</h2>
+      <span class="net positive">+7.0R</span>
+    </div>
+    <p class="month-tagline">First net positive month, driven by a new entry model and stronger discipline.</p>
+
+    <div class="dash-grid">
+      <div class="dash-cell span-3"><div class="kpi-label">Win rate</div><div class="kpi-value positive">40%</div><div class="kpi-sub">4W &middot; 2BE &middot; 4L</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Trades logged</div><div class="kpi-value">10</div><div class="kpi-sub">FTMO + B/F Testing</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">Plan followed</div><div class="kpi-value gold">90%</div><div class="kpi-sub">9 of 10 trades</div></div>
+      <div class="dash-cell span-3"><div class="kpi-label">With trend</div><div class="kpi-value gold">80%</div><div class="kpi-sub">8 of 10 trades</div></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">A</span>
+      <h2>Trade-by-trade R</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="panel">
+      <div class="chart-container small"><canvas id="juneTradeChart" role="img" aria-label="Bar chart of 10 trades in June with two standout wins at 5.45R and 2.05R"></canvas></div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">B</span>
+      <h2>Outcome split, discipline & tags</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-cell span-4">
+        <div class="panel-title">Win / loss / break even</div>
+        <div class="chart-container tiny"><canvas id="juneDonut" role="img" aria-label="Donut chart: 4 wins, 2 break even, 4 losses"></canvas></div>
+      </div>
+      <div class="dash-cell span-4">
+        <div class="panel-title">Plan discipline</div>
+        <div class="chart-container tiny"><canvas id="juneDiscipline" role="img" aria-label="Donut chart: 90 percent plan followed, 10 percent broke plan"></canvas></div>
+      </div>
+      <div class="dash-cell span-4">
+        <div class="panel-title">Trade tags this month</div>
+        <div class="pill-row">
+          <span class="pill green">Double Confirmation</span>
+          <span class="pill green">5.45R best trade</span>
+          <span class="pill red">1 counter trend slip</span>
+        </div>
+        <div class="panel-title" style="margin-top: 1.25rem;">Sessions traded</div>
+        <div class="pill-row">
+          <span class="pill">Asia x4</span>
+          <span class="pill">New York x3</span>
+          <span class="pill">London x3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-num">C</span>
+      <h2>What worked, what didn't</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="findings">
+      <div class="finding-block">
+        <div class="finding-label working">Working</div>
+        <div class="finding-text">Double Confirmation entry model (NC+S + Divergence + Engulfing) introduced mid-month, producing the two standout wins of 5.45R and 2.05R. With-trend-only discipline held for 80% of trades.</div>
+      </div>
+      <div class="finding-block">
+        <div class="finding-label not-working">Not working</div>
+        <div class="finding-text">One counter trend trade slipped through on June 22 (New York session) — and it was the single costliest loss of the month.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    XAUUSD performance dashboard &middot; data sourced from Notion trading journal &middot; R:R used to normalize across account sizes
+  </footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+  // Tab switching
+  function showTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.tabpanel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => showTab(btn.dataset.tab));
+  });
+  document.querySelectorAll('[data-goto]').forEach(el => {
+    el.addEventListener('click', () => showTab(el.dataset.goto));
+  });
+
+  Chart.defaults.font.family = "'Space Grotesk', sans-serif";
+
+  const tooltipBase = {
+    backgroundColor: '#182019',
+    borderColor: '#2a332e',
+    borderWidth: 1,
+    titleFont: { family: 'JetBrains Mono', weight: '600' },
+    bodyFont: { family: 'JetBrains Mono' },
+    titleColor: '#ffffff',
+    bodyColor: '#e8eee9',
+    padding: 10
+  };
+
+  // ===== OVERVIEW CHARTS =====
+  const months = ['March', 'April', 'May', 'June'];
+  const netR = [-3, -3, -3, 7];
+
+  new Chart(document.getElementById('monthChart'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        data: netR,
+        backgroundColor: netR.map(v => v >= 0 ? '#5eeb95' : '#ff8585'),
+        borderRadius: 3,
+        maxBarThickness: 70
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...tooltipBase, callbacks: { label: c => (c.raw > 0 ? '+' : '') + c.raw + 'R' } }
+      },
+      scales: {
+        x: { ticks: { color: '#ffffff', font: { family: 'Space Grotesk', size: 13, weight: '600' } }, grid: { display: false } },
+        y: {
+          ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 11 }, callback: v => v + 'R' },
+          grid: { color: '#22291f' },
+          border: { color: '#2a332e' }
+        }
+      }
+    }
+  });
+
+  const allR = [-1,-1,-1, -1,-1,-1, 0,2.96,-1,0,-1,-1,-1,-1, -1,2.05,-1,0,-1,-1,1.5,5.45,2.01,0];
+  let cum = 0;
+  const cumData = allR.map(r => { cum += r; return Math.round(cum * 100) / 100; });
+  const tradeLabels = allR.map((_, i) => 'T' + (i + 1));
+
+  new Chart(document.getElementById('cumChart'), {
+    type: 'line',
+    data: {
+      labels: tradeLabels,
+      datasets: [{
+        data: cumData,
+        borderColor: '#e6c14d',
+        backgroundColor: 'rgba(230,193,77,0.1)',
+        fill: true,
+        tension: 0.25,
+        pointRadius: 3,
+        pointBackgroundColor: cumData.map(v => v >= 0 ? '#5eeb95' : '#ff8585'),
+        pointBorderColor: '#080b0a',
+        pointBorderWidth: 1,
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...tooltipBase, callbacks: { label: c => (c.raw > 0 ? '+' : '') + c.raw + 'R' } }
+      },
+      scales: {
+        x: { ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } },
+        y: {
+          ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 11 }, callback: v => v + 'R' },
+          grid: { color: '#22291f' },
+          border: { color: '#2a332e' }
+        }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('heroSpark'), {
+    type: 'line',
+    data: {
+      labels: tradeLabels,
+      datasets: [{ data: cumData, borderColor: '#e6c14d', borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.25 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: { x: { display: false }, y: { display: false } }
+    }
+  });
+
+  // ===== DRAWDOWN =====
+  let peak = -Infinity;
+  const drawdown = cumData.map(v => { peak = Math.max(peak, v); return Math.round((v - peak) * 100) / 100; });
+
+  new Chart(document.getElementById('drawdownChart'), {
+    type: 'line',
+    data: {
+      labels: tradeLabels,
+      datasets: [{
+        data: drawdown,
+        borderColor: '#ff8585',
+        backgroundColor: 'rgba(255,133,133,0.12)',
+        fill: true,
+        tension: 0.2,
+        pointRadius: 2,
+        pointBackgroundColor: '#ff8585',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { ...tooltipBase, callbacks: { label: c => c.raw + 'R' } } },
+      scales: {
+        x: { ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 10 }, maxTicksLimit: 12 }, grid: { display: false } },
+        y: { ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 11 }, callback: v => v + 'R' }, grid: { color: '#22291f' }, border: { color: '#2a332e' } }
+      }
+    }
+  });
+
+  // ===== R DISTRIBUTION =====
+  const buckets = { '-1R': 0, '0R (BE)': 0, '+1 to +2R': 0, '+2 to +3R': 0, '+3R+': 0 };
+  allR.forEach(r => {
+    if (r <= -0.5) buckets['-1R']++;
+    else if (r > -0.5 && r < 0.5) buckets['0R (BE)']++;
+    else if (r >= 0.5 && r < 2) buckets['+1 to +2R']++;
+    else if (r >= 2 && r < 3) buckets['+2 to +3R']++;
+    else buckets['+3R+']++;
+  });
+
+  new Chart(document.getElementById('distChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(buckets),
+      datasets: [{
+        data: Object.values(buckets),
+        backgroundColor: ['#ff8585', '#ffc857', '#5eeb95', '#5eeb95', '#e6c14d'],
+        borderRadius: 3,
+        maxBarThickness: 50
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { ...tooltipBase, callbacks: { label: c => c.raw + ' trade' + (c.raw === 1 ? '' : 's') } } },
+      scales: {
+        x: { ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 10 } }, grid: { display: false } },
+        y: { ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 11 }, stepSize: 1 }, grid: { color: '#22291f' }, border: { color: '#2a332e' } }
+      }
+    }
+  });
+
+  // ===== STREAKS =====
+  function computeStreaks(arr) {
+    const streaks = [];
+    let cur = arr[0] > 0 ? 'win' : (arr[0] < 0 ? 'loss' : 'be');
+    let len = 1;
+    for (let i = 1; i < arr.length; i++) {
+      const type = arr[i] > 0 ? 'win' : (arr[i] < 0 ? 'loss' : 'be');
+      if (type === cur) { len++; }
+      else { streaks.push({ type: cur, len }); cur = type; len = 1; }
+    }
+    streaks.push({ type: cur, len });
+    return streaks;
+  }
+  const streaks = computeStreaks(allR).filter(s => s.type !== 'be');
+  const longestWin = Math.max(0, ...streaks.filter(s => s.type === 'win').map(s => s.len));
+  const longestLoss = Math.max(0, ...streaks.filter(s => s.type === 'loss').map(s => s.len));
+
+  new Chart(document.getElementById('streakChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Longest win streak', 'Longest loss streak'],
+      datasets: [{
+        data: [longestWin, longestLoss],
+        backgroundColor: ['#5eeb95', '#ff8585'],
+        borderRadius: 3,
+        maxBarThickness: 60
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { ...tooltipBase, callbacks: { label: c => c.raw + ' trade' + (c.raw === 1 ? '' : 's') } } },
+      scales: {
+        x: { ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 11 }, stepSize: 1 }, grid: { color: '#22291f' }, border: { color: '#2a332e' } },
+        y: { ticks: { color: '#ffffff', font: { family: 'Space Grotesk', size: 12.5, weight: '600' } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // ===== HEATMAP =====
+  const tradeDates = [
+    { d: '2026-03-27', r: -1 }, { d: '2026-03-27', r: -1 }, { d: '2026-03-31', r: -1 },
+    { d: '2026-04-14', r: -1 }, { d: '2026-04-15', r: -1 }, { d: '2026-04-23', r: -1 },
+    { d: '2026-05-08', r: 0 }, { d: '2026-05-19', r: 2.96 }, { d: '2026-05-15', r: -1 },
+    { d: '2026-05-25', r: 0 }, { d: '2026-05-26', r: -1 }, { d: '2026-05-28', r: -1 },
+    { d: '2026-05-28', r: -1 }, { d: '2026-06-02', r: -1 },
+    { d: '2026-06-04', r: -1 }, { d: '2026-06-09', r: 2.05 }, { d: '2026-06-15', r: -1 },
+    { d: '2026-06-18', r: 0 }, { d: '2026-06-22', r: -1 }, { d: '2026-06-22', r: -1 },
+    { d: '2026-06-23', r: 1.5 }, { d: '2026-06-24', r: 5.45 }, { d: '2026-06-29', r: 2.01 },
+    { d: '2026-06-29', r: 0 }
+  ];
+  const dailyMap = {};
+  tradeDates.forEach(t => { dailyMap[t.d] = (dailyMap[t.d] || 0) + t.r; });
+
+  function colorForR(r) {
+    if (r === undefined) return '#182019';
+    if (r <= -1.5) return '#3a1a1a';
+    if (r < 0) return '#7a3030';
+    if (r === 0) return '#2a332e';
+    if (r < 2) return '#1d3a26';
+    return '#1f5c38';
+  }
+
+  const startDate = new Date('2026-03-01');
+  const endDate = new Date('2026-06-30');
+  const heatmapEl = document.getElementById('heatmap');
+  let d = new Date(startDate);
+  while (d <= endDate) {
+    const key = d.toISOString().slice(0, 10);
+    const r = dailyMap[key];
+    const cell = document.createElement('div');
+    cell.className = 'heatmap-cell';
+    cell.style.background = colorForR(r);
+    const tip = document.createElement('div');
+    tip.className = 'hm-tooltip';
+    tip.textContent = key + (r !== undefined ? ' · ' + (r > 0 ? '+' : '') + r.toFixed(2) + 'R' : ' · no trades');
+    cell.appendChild(tip);
+    heatmapEl.appendChild(cell);
+    d.setDate(d.getDate() + 1);
+  }
+
+  // ===== SESSION BARS =====
+  function buildSessionBar(canvasId, w, be, l) {
+    new Chart(document.getElementById(canvasId), {
+      type: 'bar',
+      data: {
+        labels: ['W', 'BE', 'L'],
+        datasets: [{ data: [w, be, l], backgroundColor: ['#5eeb95', '#ffc857', '#ff8585'], borderRadius: 3, maxBarThickness: 36 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { ...tooltipBase, callbacks: { label: c => c.raw + ' trades' } } },
+        scales: {
+          x: { ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 11 } }, grid: { display: false } },
+          y: { ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 10 }, stepSize: 1 }, grid: { color: '#22291f' }, border: { color: '#2a332e' } }
+        }
+      }
+    });
+  }
+  buildSessionBar('asiaBar', 2, 2, 6);
+  buildSessionBar('londonBar', 1, 0, 4);
+  buildSessionBar('nyBar', 2, 1, 5);
+
+  // ===== Reusable builders for month pages =====
+  function buildTradeBar(canvasId, data, labels) {
+    new Chart(document.getElementById(canvasId), {
+      type: 'bar',
+      data: {
+        labels: labels || data.map((_, i) => 'T' + (i + 1)),
+        datasets: [{
+          data: data,
+          backgroundColor: data.map(v => v > 0 ? '#5eeb95' : (v === 0 ? '#ffc857' : '#ff8585')),
+          borderRadius: 3,
+          maxBarThickness: 45
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { ...tooltipBase, callbacks: { label: c => (c.raw > 0 ? '+' : '') + c.raw + 'R' } } },
+        scales: {
+          x: { ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 10.5 } }, grid: { display: false } },
+          y: { ticks: { color: '#b8c4be', font: { family: 'JetBrains Mono', size: 11 }, callback: v => v + 'R' }, grid: { color: '#22291f' }, border: { color: '#2a332e' } }
+        }
+      }
+    });
+  }
+
+  function buildDonut(canvasId, values, colors, labels) {
+    new Chart(document.getElementById(canvasId), {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{ data: values, backgroundColor: colors, borderColor: '#080b0a', borderWidth: 3 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '68%',
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#e8eee9', font: { family: 'JetBrains Mono', size: 11 }, padding: 14, usePointStyle: true, pointStyle: 'circle' } },
+          tooltip: tooltipBase
+        }
+      }
+    });
+  }
+
+  // March
+  buildTradeBar('marchTradeChart', [-1, -1, -1]);
+  buildDonut('marchDonut', [0, 0, 3], ['#5eeb95', '#ffc857', '#ff8585'], ['Win', 'Break Even', 'Loss']);
+
+  // April
+  buildTradeBar('aprilTradeChart', [-1, -1, -1]);
+  buildDonut('aprilDonut', [0, 0, 3], ['#5eeb95', '#ffc857', '#ff8585'], ['Win', 'Break Even', 'Loss']);
+
+  // May
+  buildTradeBar('mayTradeChart', [0, 2.96, -1, 0, -1, -1, -1, -1]);
+  buildDonut('mayDonut', [1, 2, 5], ['#5eeb95', '#ffc857', '#ff8585'], ['Win', 'Break Even', 'Loss']);
+
+  // June
+  buildTradeBar('juneTradeChart', [-1, 2.05, -1, 0, -1, -1, 1.5, 5.45, 2.01, 0]);
+  buildDonut('juneDonut', [4, 2, 4], ['#5eeb95', '#ffc857', '#ff8585'], ['Win', 'Break Even', 'Loss']);
+  buildDonut('juneDiscipline', [90, 10], ['#e6c14d', '#ff8585'], ['Followed', 'Broke']);
+</script>
+
+</body>
+</html>
